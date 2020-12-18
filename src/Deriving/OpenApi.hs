@@ -3,6 +3,7 @@
 module Deriving.OpenApi
   ( CustomOpenApi,
     DatatypeNameModifier,
+    ToSchema,
     module Deriving.Aeson,
   )
 where
