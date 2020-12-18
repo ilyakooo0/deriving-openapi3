@@ -1,0 +1,23 @@
+name: openapi3-deriving
+version: 0.1.0
+synopsis: DerivingVia for OpenAPI 3
+# description:
+maintainer: Ilya Kostyuchenko <ilyakooo0@gmail.com>
+github: ilyakooo0/openapi3-deriving
+ghc-options: -Wall
+dependencies:
+  - base
+  - openapi3
+  - deriving-aeson
+  - aeson
+library:
+  source-dirs: src
+default-extensions:
+  - AllowAmbiguousTypes
+  - ScopedTypeVariables
+  - KindSignatures
+  - DataKinds
+  - TypeOperators
+  - FlexibleInstances
+  - TypeApplications
+  - UndecidableInstances
