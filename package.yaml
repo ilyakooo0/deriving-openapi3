@@ -1,9 +1,9 @@
-name: openapi3-deriving
+name: deriving-openapi3
 version: 0.1.0
 synopsis: DerivingVia for OpenAPI 3
 # description:
 maintainer: Ilya Kostyuchenko <ilyakooo0@gmail.com>
-github: ilyakooo0/openapi3-deriving
+github: ilyakooo0/deriving-openapi3
 ghc-options: -Wall
 dependencies:
   - base
