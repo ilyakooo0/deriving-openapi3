@@ -10,6 +10,9 @@ dependencies:
   - openapi3
   - deriving-aeson
   - aeson
+  - servant
+  - lens
+  - text
 library:
   source-dirs: src
 default-extensions:
@@ -21,3 +24,6 @@ default-extensions:
   - FlexibleInstances
   - TypeApplications
   - UndecidableInstances
+  - TypeFamilies
+  - PolyKinds
+  - OverloadedStrings

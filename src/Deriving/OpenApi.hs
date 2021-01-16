@@ -5,32 +5,60 @@ module Deriving.OpenApi
     DatatypeNameModifier,
     ToSchema,
     module Deriving.Aeson,
+    Extending,
   )
 where
 
+import Control.Lens
 import qualified Data.Aeson.Types as A
 import Data.Kind
 import Data.OpenApi
 import Data.OpenApi.Internal.Schema
 import Data.Proxy
+import Data.Text (Text)
+import qualified Data.Text as T
 import Deriving.Aeson
 import GHC.Generics
 import GHC.TypeLits
+import Servant.API
 
 type CustomOpenApi = CustomJSON
 
 instance (OpenApiOptions xs, GToSchema (Rep x), Generic x) => ToSchema (CustomJSON xs x) where
-  declareNamedSchema Proxy = genericDeclareNamedSchema (openApiOptions @xs) (Proxy @x)
+  declareNamedSchema Proxy =
+    openApiSchemaModifier @xs <$> genericDeclareNamedSchema (openApiOptions @xs) (Proxy @x)
 
 data DatatypeNameModifier t
 
 instance (StringModifier f, OpenApiOptions xs) => OpenApiOptions (DatatypeNameModifier f ': xs) where
   openApiOptions = (openApiOptions @xs) {datatypeNameModifier = getStringModifier @f}
 
+instance (AesonOptions xs) => AesonOptions (DatatypeNameModifier f ': xs) where
+  aesonOptions = aesonOptions @xs
+
+instance (AesonOptions xs) => AesonOptions (Description f ': xs) where
+  aesonOptions = aesonOptions @xs
+
+instance (OpenApiOptions xs, KnownSymbol t) => OpenApiOptions (Description t ': xs) where
+  openApiOptions = openApiOptions @xs
+  openApiSchemaModifier = schema . description <>~ Just (toTextLine @t)
+
+toTextLine :: forall s. KnownSymbol s => Text
+toTextLine = "\n\n" <> T.pack (symbolVal (Proxy @s))
+
+type family (++) (x :: [k]) (y :: [k]) :: [k] where
+  (++) '[] ys = ys
+  (++) (x ': xs) ys = xs ++ (x ': ys)
+
+type family Extending (c :: * -> *) (ee :: [*]) :: * -> * where
+  Extending (CustomJSON a) ee = CustomJSON (a ++ ee)
+
 -- deriving-aeson-based instances
 
 class OpenApiOptions (xs :: [Type]) where
   openApiOptions :: SchemaOptions
+  openApiSchemaModifier :: NamedSchema -> NamedSchema
+  openApiSchemaModifier = id
 
 instance OpenApiOptions '[] where
   openApiOptions = defaultSchemaOptions
