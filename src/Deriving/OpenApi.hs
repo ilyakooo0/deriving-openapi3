@@ -17,6 +17,7 @@ import Data.OpenApi.Internal.Schema
 import Data.Proxy
 import Data.Text (Text)
 import qualified Data.Text as T
+import Data.Typeable
 import Deriving.Aeson
 import GHC.Generics
 import GHC.TypeLits
@@ -24,7 +25,7 @@ import Servant.API
 
 type CustomOpenApi = CustomJSON
 
-instance (OpenApiOptions xs, GToSchema (Rep x), Generic x) => ToSchema (CustomJSON xs x) where
+instance (OpenApiOptions xs, GToSchema (Rep x), Generic x, Typeable x) => ToSchema (CustomJSON xs x) where
   declareNamedSchema Proxy =
     openApiSchemaModifier @xs <$> genericDeclareNamedSchema (openApiOptions @xs) (Proxy @x)
 
