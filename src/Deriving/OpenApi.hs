@@ -17,6 +17,7 @@ import Data.OpenApi.Internal.Schema
 import Data.Proxy
 import Data.Text (Text)
 import qualified Data.Text as T
+import Data.Typeable
 import Deriving.Aeson
 import GHC.Generics
 import GHC.TypeLits
@@ -24,7 +25,7 @@ import Servant.API
 
 type CustomOpenApi = CustomJSON
 
-instance (OpenApiOptions xs, GToSchema (Rep x), Generic x) => ToSchema (CustomJSON xs x) where
+instance (OpenApiOptions xs, GToSchema (Rep x), Generic x, Typeable x, Typeable xs) => ToSchema (CustomJSON xs x) where
   declareNamedSchema Proxy =
     openApiSchemaModifier @xs <$> genericDeclareNamedSchema (openApiOptions @xs) (Proxy @x)
 
@@ -79,7 +80,7 @@ instance (StringModifier f, OpenApiOptions xs) => OpenApiOptions (ConstructorTag
   openApiOptions = (openApiOptions @xs) {constructorTagModifier = getStringModifier @f}
 
 instance
-  (OpenApiOptions xs, TypeError ( 'Text "openapi3-deriving does not currently the `TagSingleConstructors` modifier.")) =>
+  (OpenApiOptions xs, TypeError ('Text "openapi3-deriving does not currently the `TagSingleConstructors` modifier.")) =>
   OpenApiOptions (TagSingleConstructors ': xs)
   where
   openApiOptions = undefined

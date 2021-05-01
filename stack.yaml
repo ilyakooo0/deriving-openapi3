@@ -4,4 +4,4 @@ packages:
   - .
 
 extra-deps:
-  - openapi3-3.0.0.1@sha256:205669d14c5b48d2275e0bac41d78c9bfdb925ef9a8e3265662ce51a9e6d8139,4641
+  - openapi3-3.1.0
