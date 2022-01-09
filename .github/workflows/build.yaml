@@ -51,7 +51,7 @@ jobs:
         shell: bash
         run: |
           stack install ormolu
-          ormolu -o -XTypeApplications -o -XCPP -m check $(find . -type f -name "*.hs")
+          ormolu -o -XTypeApplications -o -XCPP -m check $(find src -type f -name "*.hs")
 
       - name: Publish candidate
         shell: bash
