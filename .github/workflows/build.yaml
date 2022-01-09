@@ -28,18 +28,18 @@ jobs:
       - uses: actions/checkout@v2
 
 
-    - name: Cache
-      uses: actions/cache@v1
-      with:
-        path: |
-          ~/.stack
-          .stack-work
-        key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
-          ${{ runner.os }}-stack
+      - name: Cache
+        uses: actions/cache@v1
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
+            ${{ runner.os }}-stack
 
-      - name: Build
-        shell: bash
-        run: |
-          stack build
+        - name: Build
+          shell: bash
+          run: |
+            stack build
