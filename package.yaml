@@ -1,18 +1,31 @@
 name: deriving-openapi3
 version: 0.1.0.0
 synopsis: DerivingVia for OpenAPI 3
-# description:
+description: See <https://github.com/ilyakooo0/deriving-openapi3 GitHub> for more details.
 maintainer: Ilya Kostyuchenko <ilyakooo0@gmail.com>
+category: JSON, Generics
+license: MIT
 github: ilyakooo0/deriving-openapi3
-ghc-options: -Wall
+ghc-options: -Weverything
+  -Wno-star-is-type
+  -Wno-unsafe
+  -Wno-prepositive-qualified-module
+  -Wno-safe
+  -Wno-missing-safe-haskell-mode
+  -Wno-missing-import-lists
+  -Wno-implicit-prelude
 dependencies:
   - base
   - openapi3
   - deriving-aeson
   - aeson
-  - servant
   - lens
   - text
+when:
+  - condition: flag(servant-description)
+    dependencies:
+      - servant
+    cpp-options: -DSERVANT_DESCRIPTION
 library:
   source-dirs: src
 default-extensions:
@@ -27,3 +40,8 @@ default-extensions:
   - TypeFamilies
   - PolyKinds
   - OverloadedStrings
+flags:
+  servant-description:
+    description: Create instances for the 'Description' type from 'servant'
+    default: true
+    manual: false
