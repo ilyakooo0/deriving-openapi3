@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module Deriving.OpenApi
@@ -15,13 +16,28 @@ import Data.Kind
 import Data.OpenApi
 import Data.OpenApi.Internal.Schema
 import Data.Proxy
-import Data.Text (Text)
-import qualified Data.Text as T
 import Data.Typeable
 import Deriving.Aeson
 import GHC.Generics
 import GHC.TypeLits
+
+#ifdef SERVANT_DESCRIPTION
+
 import Servant.API
+import Data.Text (Text)
+import qualified Data.Text as T
+
+instance (AesonOptions xs) => AesonOptions (Description f ': xs) where
+  aesonOptions = aesonOptions @xs
+
+instance (OpenApiOptions xs, KnownSymbol t) => OpenApiOptions (Description t ': xs) where
+  openApiOptions = openApiOptions @xs
+  openApiSchemaModifier = schema . description <>~ Just (toTextLine @t)
+
+toTextLine :: forall s. KnownSymbol s => Text
+toTextLine = "\n\n" <> T.pack (symbolVal (Proxy @s))
+
+#endif
 
 type CustomOpenApi = CustomJSON
 
@@ -36,16 +52,6 @@ instance (StringModifier f, OpenApiOptions xs) => OpenApiOptions (DatatypeNameMo
 
 instance (AesonOptions xs) => AesonOptions (DatatypeNameModifier f ': xs) where
   aesonOptions = aesonOptions @xs
-
-instance (AesonOptions xs) => AesonOptions (Description f ': xs) where
-  aesonOptions = aesonOptions @xs
-
-instance (OpenApiOptions xs, KnownSymbol t) => OpenApiOptions (Description t ': xs) where
-  openApiOptions = openApiOptions @xs
-  openApiSchemaModifier = schema . description <>~ Just (toTextLine @t)
-
-toTextLine :: forall s. KnownSymbol s => Text
-toTextLine = "\n\n" <> T.pack (symbolVal (Proxy @s))
 
 type family (++) (x :: [k]) (y :: [k]) :: [k] where
   (++) '[] ys = ys
