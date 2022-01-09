@@ -3,8 +3,10 @@ version: 0.1.0.0
 synopsis: DerivingVia for OpenAPI 3
 description: See <https://github.com/ilyakooo0/deriving-openapi3 GitHub> for more details.
 maintainer: Ilya Kostyuchenko <ilyakooo0@gmail.com>
-category: JSON, Generics
+category: JSON, Generics, OpenAPI
 license: MIT
+license-file: LICENSE
+extra-source-files: Changelog.md
 github: ilyakooo0/deriving-openapi3
 ghc-options: -Weverything
   -Wno-star-is-type
