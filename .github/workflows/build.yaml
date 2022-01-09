@@ -38,6 +38,10 @@ jobs:
             ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
             ${{ runner.os }}-stack
 
+      - name: Upgrade stack
+        shell: bash
+        run: stack upgrade --git
+
       - name: Build
         shell: bash
         run: |
@@ -48,3 +52,11 @@ jobs:
         run: |
           stack install ormolu
           ormolu -o -XTypeApplications -o -XCPP -m check $(find . -type f -name "*.hs")
+
+      - name: Publish candidate
+        shell: bash
+        if: github.event_name == 'release'
+        env:
+          HACKAGE_KEY: ${{ secrets.HACKAGE_TOKEN }}
+        run: |
+          stack upload --pvp-bounds both --test-tarball --candidate .
