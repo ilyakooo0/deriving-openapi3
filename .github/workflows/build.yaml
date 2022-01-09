@@ -1,4 +1,4 @@
-name: Github Action Docker Image
+name: Build
 
 on:
   push:
