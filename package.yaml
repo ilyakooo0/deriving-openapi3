@@ -1,5 +1,5 @@
 name: deriving-openapi3
-version: 0.1.0
+version: 0.1.0.0
 synopsis: DerivingVia for OpenAPI 3
 # description:
 maintainer: Ilya Kostyuchenko <ilyakooo0@gmail.com>

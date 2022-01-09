@@ -1,0 +1,45 @@
+name: Github Action Docker Image
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  release:
+    types: [prereleased]
+
+jobs:
+  check_versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check library version
+        if: github.event_name == 'release'
+        run: |
+          if [ "$(yq eval ".version" package.yaml)" != "${{ github.event.release.tag_name }}" ]; then
+            echo "::error file=action.yaml::Library version does not match release version."
+            exit 1
+          fi
+  Linux:
+    needs: check_versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+
+    - name: Cache
+      uses: actions/cache@v1
+      with:
+        path: |
+          ~/.stack
+          .stack-work
+        key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}-${{ hashFiles('package.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
+          ${{ runner.os }}-stack
+
+      - name: Build
+        shell: bash
+        run: |
+          stack build
