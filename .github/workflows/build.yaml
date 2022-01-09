@@ -27,7 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-
       - name: Cache
         uses: actions/cache@v1
         with:
@@ -39,7 +38,7 @@ jobs:
             ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
             ${{ runner.os }}-stack
 
-        - name: Build
-          shell: bash
-          run: |
-            stack build
+      - name: Build
+        shell: bash
+        run: |
+          stack build
