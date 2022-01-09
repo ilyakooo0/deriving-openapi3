@@ -72,6 +72,7 @@ instance OpenApiOptions xs => OpenApiOptions (OmitNothingFields ': xs) where
 
 instance OpenApiOptions xs => OpenApiOptions (RejectUnknownFields ': xs) where
   openApiOptions = openApiOptions @xs
+  openApiSchemaModifier = schema . additionalProperties .~ Just (AdditionalPropertiesAllowed False)
 
 instance (StringModifier f, OpenApiOptions xs) => OpenApiOptions (FieldLabelModifier f ': xs) where
   openApiOptions = (openApiOptions @xs) {fieldLabelModifier = getStringModifier @f}
