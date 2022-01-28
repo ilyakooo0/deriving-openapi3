@@ -47,6 +47,11 @@ jobs:
         run: |
           stack build
 
+      - name: doctests
+        shell: bash
+        run: |
+          ./runDoctests.sh
+
       - name: Check Formatting
         shell: bash
         run: |

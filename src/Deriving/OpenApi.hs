@@ -1,18 +1,43 @@
 {-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
+-- | __Example:__
+--
+-- >>> :set -XDerivingStrategies -XDerivingVia -XDeriveGeneric
+--
+-- >>> :{
+-- data User = User
+--   { userFirstName :: String,
+--     userAge :: Maybe Integer
+--   }
+--   deriving stock (Generic)
+--   deriving (FromJSON, ToJSON, ToSchema)
+--     via CustomJSON
+--          '[FieldLabelModifier '[StripPrefix "user", CamelToSnake], RejectUnknownFields]
+--          User
+-- showYaml = Data.ByteString.Char8.putStr . Data.Yaml.encode
+-- :}
+--
+-- >>> showYaml $ toSchema (Proxy :: Proxy User)
+-- type: object
+-- properties:
+--   first_name:
+--     type: string
+--   age:
+--     type: integer
+-- required:
+-- - first_name
+-- additionalProperties: false
 module Deriving.OpenApi
   ( CustomOpenApi,
     DatatypeNameModifier,
     ToSchema,
     module Deriving.Aeson,
-    Extending,
   )
 where
 
 import Control.Lens
 import qualified Data.Aeson.Types as A
-import Data.Kind
 import Data.OpenApi
 import Data.OpenApi.Internal.Schema
 import Data.Proxy
@@ -20,6 +45,10 @@ import Data.Typeable
 import Deriving.Aeson
 import GHC.Generics
 import GHC.TypeLits
+
+-- $setup
+-- >>> import qualified Data.Yaml
+-- >>> import qualified Data.ByteString.Char8
 
 #ifdef SERVANT_DESCRIPTION
 
@@ -30,8 +59,7 @@ import qualified Data.Text as T
 instance (AesonOptions xs) => AesonOptions (Description f ': xs) where
   aesonOptions = aesonOptions @xs
 
-instance (OpenApiOptions xs, KnownSymbol t) => OpenApiOptions (Description t ': xs) where
-  openApiOptions = openApiOptions @xs
+instance KnownSymbol t => OpenApiOptionModifier (Description t) where
   openApiSchemaModifier = schema . description <>~ Just (toTextLine @t)
 
 toTextLine :: forall s. KnownSymbol s => Text
@@ -41,68 +69,65 @@ toTextLine = "\n\n" <> T.pack (symbolVal (Proxy @s))
 
 type CustomOpenApi = CustomJSON
 
-instance (OpenApiOptions xs, GToSchema (Rep x), Generic x, Typeable x, Typeable xs) => ToSchema (CustomJSON xs x) where
+instance
+  (OpenApiOptionModifier xs, GToSchema (Rep x), Generic x, Typeable x, Typeable xs, Typeable k) =>
+  ToSchema (CustomJSON (xs :: k) x)
+  where
   declareNamedSchema Proxy =
-    openApiSchemaModifier @xs <$> genericDeclareNamedSchema (openApiOptions @xs) (Proxy @x)
+    openApiSchemaModifier @xs
+      <$> genericDeclareNamedSchema (openApiOptionsModifier @xs defaultSchemaOptions) (Proxy @x)
+
+class OpenApiOptionModifier x where
+  openApiOptionsModifier :: SchemaOptions -> SchemaOptions
+  openApiOptionsModifier = id
+  openApiSchemaModifier :: NamedSchema -> NamedSchema
+  openApiSchemaModifier = id
 
 data DatatypeNameModifier t
 
-instance (StringModifier f, OpenApiOptions xs) => OpenApiOptions (DatatypeNameModifier f ': xs) where
-  openApiOptions = (openApiOptions @xs) {datatypeNameModifier = getStringModifier @f}
+instance (StringModifier f) => OpenApiOptionModifier (DatatypeNameModifier f) where
+  openApiOptionsModifier o = o {datatypeNameModifier = getStringModifier @f}
 
 instance (AesonOptions xs) => AesonOptions (DatatypeNameModifier f ': xs) where
   aesonOptions = aesonOptions @xs
 
-type family (++) (x :: [k]) (y :: [k]) :: [k] where
-  (++) '[] ys = ys
-  (++) (x ': xs) ys = xs ++ (x ': ys)
-
-type family Extending (c :: * -> *) (ee :: [*]) :: * -> * where
-  Extending (CustomJSON a) ee = CustomJSON (a ++ ee)
-
 -- deriving-aeson-based instances
 
-class OpenApiOptions (xs :: [Type]) where
-  openApiOptions :: SchemaOptions
-  openApiSchemaModifier :: NamedSchema -> NamedSchema
-  openApiSchemaModifier = id
+instance OpenApiOptionModifier UnwrapUnaryRecords where
+  openApiOptionsModifier o = o {unwrapUnaryRecords = True}
 
-instance OpenApiOptions '[] where
-  openApiOptions = defaultSchemaOptions
+instance OpenApiOptionModifier OmitNothingFields
 
-instance OpenApiOptions xs => OpenApiOptions (UnwrapUnaryRecords ': xs) where
-  openApiOptions = (openApiOptions @xs) {unwrapUnaryRecords = True}
-
-instance OpenApiOptions xs => OpenApiOptions (OmitNothingFields ': xs) where
-  openApiOptions = openApiOptions @xs
-
-instance OpenApiOptions xs => OpenApiOptions (RejectUnknownFields ': xs) where
-  openApiOptions = openApiOptions @xs
+instance OpenApiOptionModifier RejectUnknownFields where
   openApiSchemaModifier = schema . additionalProperties .~ Just (AdditionalPropertiesAllowed False)
 
-instance (StringModifier f, OpenApiOptions xs) => OpenApiOptions (FieldLabelModifier f ': xs) where
-  openApiOptions = (openApiOptions @xs) {fieldLabelModifier = getStringModifier @f}
+instance StringModifier f => OpenApiOptionModifier (FieldLabelModifier f) where
+  openApiOptionsModifier o = o {fieldLabelModifier = getStringModifier @f}
 
-instance (StringModifier f, OpenApiOptions xs) => OpenApiOptions (ConstructorTagModifier f ': xs) where
-  openApiOptions = (openApiOptions @xs) {constructorTagModifier = getStringModifier @f}
+instance StringModifier f => OpenApiOptionModifier (ConstructorTagModifier f) where
+  openApiOptionsModifier o = o {constructorTagModifier = getStringModifier @f}
 
 instance
-  (OpenApiOptions xs, TypeError ('Text "openapi3-deriving does not currently the `TagSingleConstructors` modifier.")) =>
-  OpenApiOptions (TagSingleConstructors ': xs)
-  where
-  openApiOptions = undefined
+  TypeError ('Text "deriving-openapi3 does not currently the `TagSingleConstructors` modifier.") =>
+  OpenApiOptionModifier TagSingleConstructors
 
-instance OpenApiOptions xs => OpenApiOptions (NoAllNullaryToStringTag ': xs) where
-  openApiOptions = (openApiOptions @xs) {allNullaryToStringTag = False}
+instance OpenApiOptionModifier NoAllNullaryToStringTag where
+  openApiOptionsModifier o = o {allNullaryToStringTag = False}
 
-instance (KnownSymbol t, KnownSymbol c, OpenApiOptions xs) => OpenApiOptions (SumTaggedObject t c ': xs) where
-  openApiOptions = (openApiOptions @xs) {sumEncoding = A.TaggedObject (symbolVal (Proxy @t)) (symbolVal (Proxy @c))}
+instance (KnownSymbol t, KnownSymbol c) => OpenApiOptionModifier (SumTaggedObject t c) where
+  openApiOptionsModifier o = o {sumEncoding = A.TaggedObject (symbolVal (Proxy @t)) (symbolVal (Proxy @c))}
 
-instance (OpenApiOptions xs) => OpenApiOptions (SumUntaggedValue ': xs) where
-  openApiOptions = (openApiOptions @xs) {sumEncoding = A.UntaggedValue}
+instance OpenApiOptionModifier SumUntaggedValue where
+  openApiOptionsModifier o = o {sumEncoding = A.UntaggedValue}
 
-instance (OpenApiOptions xs) => OpenApiOptions (SumObjectWithSingleField ': xs) where
-  openApiOptions = (openApiOptions @xs) {sumEncoding = A.ObjectWithSingleField}
+instance OpenApiOptionModifier SumObjectWithSingleField where
+  openApiOptionsModifier o = o {sumEncoding = A.ObjectWithSingleField}
 
-instance (OpenApiOptions xs) => OpenApiOptions (SumTwoElemArray ': xs) where
-  openApiOptions = (openApiOptions @xs) {sumEncoding = A.TwoElemArray}
+instance OpenApiOptionModifier SumTwoElemArray where
+  openApiOptionsModifier o = o {sumEncoding = A.TwoElemArray}
+
+instance OpenApiOptionModifier '[]
+
+instance (OpenApiOptionModifier x, OpenApiOptionModifier xs) => OpenApiOptionModifier (x ': xs) where
+  openApiOptionsModifier = openApiOptionsModifier @xs . openApiOptionsModifier @x
+  openApiSchemaModifier = openApiSchemaModifier @xs . openApiSchemaModifier @x

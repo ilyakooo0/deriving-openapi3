@@ -1,7 +1,7 @@
 name: deriving-openapi3
 version: 0.1.0.0
 synopsis: DerivingVia for OpenAPI 3
-description: See <https://github.com/ilyakooo0/deriving-openapi3 GitHub> for more details.
+description: DerivingVia for OpenAPI 3
 maintainer: Ilya Kostyuchenko <ilyakooo0@gmail.com>
 category: JSON, Generics, OpenAPI
 license: MIT
@@ -42,6 +42,8 @@ default-extensions:
   - TypeFamilies
   - PolyKinds
   - OverloadedStrings
+  - DerivingStrategies
+  - DerivingVia
 flags:
   servant-description:
     description: Create instances for the 'Description' type from 'servant'

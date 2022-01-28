@@ -1,7 +1,4 @@
-resolver: lts-18.21
+resolver: lts-18.23
 
 packages:
   - .
-
-extra-deps:
-  - openapi3-3.1.0
