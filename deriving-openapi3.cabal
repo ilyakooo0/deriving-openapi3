@@ -1,0 +1,63 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.5.
+--
+-- see: https://github.com/sol/hpack
+
+name:           deriving-openapi3
+version:        0.1.0.0
+synopsis:       DerivingVia for OpenAPI 3
+description:    DerivingVia for OpenAPI 3
+category:       JSON, Generics, OpenAPI
+homepage:       https://github.com/ilyakooo0/deriving-openapi3#readme
+bug-reports:    https://github.com/ilyakooo0/deriving-openapi3/issues
+maintainer:     Ilya Kostyuchenko <ilyakooo0@gmail.com>
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    Changelog.md
+
+source-repository head
+  type: git
+  location: https://github.com/ilyakooo0/deriving-openapi3
+
+flag servant-description
+  description: Create instances for the 'Description' type from 'servant'
+  manual: False
+  default: True
+
+library
+  exposed-modules:
+      Deriving.OpenApi
+  other-modules:
+      Paths_deriving_openapi3
+  hs-source-dirs:
+      src
+  default-extensions:
+      AllowAmbiguousTypes
+      ScopedTypeVariables
+      KindSignatures
+      DataKinds
+      TypeOperators
+      FlexibleInstances
+      TypeApplications
+      UndecidableInstances
+      TypeFamilies
+      PolyKinds
+      OverloadedStrings
+      DerivingStrategies
+      DerivingVia
+  ghc-options: -Weverything -Wno-star-is-type -Wno-unsafe -Wno-prepositive-qualified-module -Wno-safe -Wno-missing-safe-haskell-mode -Wno-missing-import-lists -Wno-implicit-prelude
+  build-depends:
+      aeson
+    , base
+    , deriving-aeson
+    , lens
+    , openapi3
+    , text
+  if flag(servant-description)
+    cpp-options: -DSERVANT_DESCRIPTION
+    build-depends:
+        servant
+  default-language: Haskell2010
