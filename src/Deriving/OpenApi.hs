@@ -98,8 +98,10 @@ instance OpenApiOptionModifier UnwrapUnaryRecords where
 
 instance OpenApiOptionModifier OmitNothingFields
 
+#if MIN_VERSION_deriving_aeson(0,2,4)
 instance OpenApiOptionModifier RejectUnknownFields where
   openApiSchemaModifier = schema . additionalProperties .~ Just (AdditionalPropertiesAllowed False)
+#endif
 
 instance StringModifier f => OpenApiOptionModifier (FieldLabelModifier f) where
   openApiOptionsModifier o = o {fieldLabelModifier = getStringModifier @f}
