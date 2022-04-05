@@ -39,8 +39,8 @@ where
 import Control.Lens
 import qualified Data.Aeson.Types as A
 import Data.OpenApi
-import Data.OpenApi.Internal.Schema
 import Data.OpenApi.Internal.ParamSchema
+import Data.OpenApi.Internal.Schema
 import Data.Proxy
 import Data.Typeable
 import Deriving.Aeson
@@ -83,7 +83,7 @@ instance
   ToParamSchema (CustomJSON (xs :: k) x)
   where
   toParamSchema Proxy =
-      genericToParamSchema (openApiOptionsModifier @xs defaultSchemaOptions) (Proxy @x)
+    genericToParamSchema (openApiOptionsModifier @xs defaultSchemaOptions) (Proxy @x)
 
 class OpenApiOptionModifier x where
   openApiOptionsModifier :: SchemaOptions -> SchemaOptions
