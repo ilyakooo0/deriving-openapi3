@@ -46,7 +46,6 @@ import Deriving.Aeson
 import GHC.Generics
 import GHC.TypeLits
 
-
 #ifdef SERVANT_DESCRIPTION
 
 import Servant.API
