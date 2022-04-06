@@ -47,10 +47,6 @@ import Deriving.Aeson
 import GHC.Generics
 import GHC.TypeLits
 
--- $setup
--- >>> import qualified Data.Yaml
--- >>> import qualified Data.ByteString.Char8
-
 #ifdef SERVANT_DESCRIPTION
 
 import Servant.API
@@ -67,6 +63,10 @@ toTextLine :: forall s. KnownSymbol s => Text
 toTextLine = "\n\n" <> T.pack (symbolVal (Proxy @s))
 
 #endif
+
+-- $setup
+-- >>> import qualified Data.Yaml
+-- >>> import qualified Data.ByteString.Char8
 
 type CustomOpenApi = CustomJSON
 
