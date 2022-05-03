@@ -42,16 +42,14 @@ import Data.OpenApi
 import Data.OpenApi.Internal.ParamSchema
 import Data.OpenApi.Internal.Schema
 import Data.Proxy
+import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Typeable
 import Deriving.Aeson
 import GHC.Generics
 import GHC.TypeLits
 
-#ifdef SERVANT_DESCRIPTION
-
-import Servant.API
-import Data.Text (Text)
-import qualified Data.Text as T
+data Description (desc :: Symbol) = Description
 
 instance (AesonOptions xs) => AesonOptions (Description f ': xs) where
   aesonOptions = aesonOptions @xs
@@ -61,8 +59,6 @@ instance KnownSymbol t => OpenApiOptionModifier (Description t) where
 
 toTextLine :: forall s. KnownSymbol s => Text
 toTextLine = "\n\n" <> T.pack (symbolVal (Proxy @s))
-
-#endif
 
 -- $setup
 -- >>> import qualified Data.Yaml
