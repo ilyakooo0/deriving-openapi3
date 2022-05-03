@@ -38,10 +38,6 @@ jobs:
             ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
             ${{ runner.os }}-stack
 
-      - name: Upgrade stack
-        shell: bash
-        run: stack upgrade --git
-
       - name: Build
         shell: bash
         run: |
