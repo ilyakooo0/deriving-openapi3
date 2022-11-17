@@ -48,6 +48,7 @@ library
       OverloadedStrings
       DerivingStrategies
       DerivingVia
+      FlexibleContexts
   ghc-options: -Weverything -Wno-star-is-type -Wno-unsafe -Wno-prepositive-qualified-module -Wno-safe -Wno-missing-safe-haskell-mode -Wno-missing-import-lists -Wno-implicit-prelude
   build-depends:
       aeson
