@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           deriving-openapi3
-version:        0.1.0.0
+version:        0.1.0.1
 synopsis:       DerivingVia for OpenAPI 3
 description:    DerivingVia for OpenAPI 3
 category:       JSON, Generics, OpenAPI
@@ -48,6 +48,7 @@ library
       OverloadedStrings
       DerivingStrategies
       DerivingVia
+      FlexibleContexts
   ghc-options: -Weverything -Wno-star-is-type -Wno-unsafe -Wno-prepositive-qualified-module -Wno-safe -Wno-missing-safe-haskell-mode -Wno-missing-import-lists -Wno-implicit-prelude
   build-depends:
       aeson
