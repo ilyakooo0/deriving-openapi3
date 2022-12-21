@@ -22,11 +22,6 @@ source-repository head
   type: git
   location: https://github.com/ilyakooo0/deriving-openapi3
 
-flag servant-description
-  description: Create instances for the 'Description' type from 'servant'
-  manual: False
-  default: True
-
 library
   exposed-modules:
       Deriving.OpenApi
@@ -57,8 +52,4 @@ library
     , lens
     , openapi3
     , text
-  if flag(servant-description)
-    cpp-options: -DSERVANT_DESCRIPTION
-    build-depends:
-        servant
   default-language: Haskell2010
